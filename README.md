@@ -1,5 +1,6 @@
 ### Ansible Jenkins
-This is a collection of Ansible playbooks I've written to automate the installation, configuration and maintenance of a Vagrant VM running Jenkins.
+This is a collection of Ansible playbooks I've written to automate the installation, configuration and maintenance of a Vagrant VM running Jenkins on Debian GNU/Linux.
+The installation of Docker, NodeJS 8 LTS and Ruby 2.4.3 are also performed.
 
 ## Usage
 
