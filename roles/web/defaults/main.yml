@@ -4,6 +4,10 @@
 certificate:
   common: authority.darkness.org
   passphrase: self_signed_certificate_passphrase
+database:
+  name: jenkins
+  username: jenkins
+  password: jenkins_password
 git:
   repository:
     rbenv: https://github.com/rbenv/rbenv.git

@@ -1,0 +1,26 @@
+---
+# file: roles/web/tasks/postgresql.yml
+- name: install postgresql
+  apt:
+    name: "{{ item }}"
+    state: latest
+  with_items: ['postgresql', 'postgresql-contrib', 'libpq-dev', 'python3-psycopg2']
+- name: make sure postgresql is running and enabled on startup
+  service:
+    name: postgresql
+    state: started
+    enabled: yes
+- name: create the jenkins database
+  postgresql_db:
+    name: "{{ database.name }}"
+  become: yes
+  become_user: postgres
+- name: create the jenkins database user
+  postgresql_user:
+    db: "{{ database.name }}"
+    name: "{{ database.username }}"
+    password: "{{ database.password }}"
+    role_attr_flags: CREATEDB,LOGIN
+    state: present
+  become: yes
+  become_user: postgres
