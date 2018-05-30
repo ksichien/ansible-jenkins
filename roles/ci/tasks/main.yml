@@ -1,0 +1,4 @@
+---
+# file: roles/ci/tasks/main.yml
+- import_tasks: docker.yml
+- import_tasks: jenkins.yml

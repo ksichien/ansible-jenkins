@@ -1,0 +1,68 @@
+---
+# file: roles/web/tasks/ruby.yml
+- name: install rbenv
+  git:
+    repo: "{{ git.repository.rbenv }}"
+    dest: "/var/lib/jenkins/.rbenv/"
+- name: install ruby-build plugin
+  git:
+    repo: "{{ git.repository.ruby_build }}"
+    dest: "/var/lib/jenkins/.rbenv/plugins/ruby-build/"
+- name: reassign rbenv folder ownership to jenkins
+  file:
+    path: "/var/lib/jenkins/.rbenv/"
+    owner: jenkins
+    group: jenkins
+    recurse: yes
+- name: add rbenv to path in bash_profile
+  lineinfile:
+    regexp: '^export'
+    line: export PATH="$HOME/.rbenv/bin:$PATH"
+    path: "/var/lib/jenkins/.bash_profile"
+    create: yes
+    owner: jenkins
+    group: jenkins
+    mode: 0644
+    state: present
+- name: add rbenv init to bash_profile
+  lineinfile:
+    regexp: '^eval'
+    line: eval "$(rbenv init -)"
+    path: "/var/lib/jenkins/.bash_profile"
+    create: yes
+    owner: jenkins
+    group: jenkins
+    mode: 0644
+    state: present
+- name: source bash_profile in bashrc
+  lineinfile:
+    regexp: '^source ~/.bash_profile'
+    line: source ~/.bash_profile
+    path: "/var/lib/jenkins/.bashrc"
+    create: yes
+    owner: jenkins
+    group: jenkins
+    mode: 0644
+    state: present
+- name: install ruby prerequisites
+  apt:
+    name: "{{ item }}"
+    state: latest
+  with_items: ['build-essential', 'libssl-dev', 'libreadline-dev', 'zlib1g-dev']
+- name: check whether ruby is installed
+  stat:
+    path: "/var/lib/jenkins/.rbenv/versions/{{ ruby.version }}"
+  register: ruby_installed
+- name: install ruby
+  shell: "/var/lib/jenkins/.rbenv/bin/rbenv install {{ ruby.version }}"
+  when: not ruby_installed.stat.exists
+  become: yes
+  become_user: jenkins
+- name: set global ruby version
+  shell: "/var/lib/jenkins/.rbenv/bin/rbenv global {{ ruby.version }}"
+  become: yes
+  become_user: jenkins
+- name: install bundler
+  shell: "/var/lib/jenkins/.rbenv/versions/{{ ruby.version }}/bin/gem install bundler"
+  become: yes
+  become_user: jenkins

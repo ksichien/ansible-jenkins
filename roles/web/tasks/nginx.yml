@@ -1,0 +1,56 @@
+---
+# file: roles/web/tasks/nginx.yml
+- name: install openssl prerequisities
+  apt:
+    name: python3-openssl
+    state: latest
+- name: create ssl directory
+  file:
+    path: /etc/nginx/ssl/
+    state: directory
+- name: generate an openssl private key
+  openssl_privatekey:
+    path: "/etc/nginx/ssl/{{ server.name }}.pem"
+    passphrase: "{{ certificate.passphrase }}"
+    cipher: aes256
+- name: generate an openssl csr
+  openssl_csr:
+    path: "/etc/nginx/ssl/{{ server.name }}.csr"
+    privatekey_path: "/etc/nginx/ssl/{{ server.name }}.pem"
+    privatekey_passphrase: "{{ certificate.passphrase }}"
+    common_name: "{{ certificate.common }}"
+    state: present
+- name: generate an openssl self-signed certificate
+  openssl_certificate:
+    provider: selfsigned
+    csr_path: "/etc/nginx/ssl/{{ server.name }}.csr"
+    path: "/etc/nginx/ssl/{{ server.name }}.crt"
+    privatekey_path: "/etc/nginx/ssl/{{ server.name }}.pem"
+    privatekey_passphrase: "{{ certificate.passphrase }}"
+    state: present
+- name: save the certificate passphrase to a file for nginx
+  copy:
+    content: "{{ certificate.passphrase }}"
+    dest: "/etc/nginx/ssl/{{ server.name }}.pass"
+    mode: 0600
+- name: install nginx
+  apt:
+    name: "{{ item }}"
+    state: latest
+  with_items: ['nginx']
+- name: remove default nginx website
+  file:
+    path: /etc/nginx/sites-enabled/default
+    state: absent
+  notify: restart nginx
+- name: create jenkins conf file
+  template:
+    src: "{{ item }}.conf"
+    dest: "/etc/nginx/sites-enabled/{{ item }}.conf"
+  with_items: ['jenkins']
+  notify: restart nginx
+- name: make sure nginx is running and enabled on startup
+  service:
+    name: nginx
+    state: started
+    enabled: yes

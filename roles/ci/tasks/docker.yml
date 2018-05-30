@@ -1,0 +1,20 @@
+---
+# file: roles/ci/tasks/docker.yml
+- name: install docker prerequisites
+  apt:
+    name: "{{ item }}"
+    state: latest
+  with_items: ['apt-transport-https', 'ca-certificates', 'curl', 'gnupg2', 'software-properties-common']
+- name: add docker apt key
+  apt_key:
+    url: https://download.docker.com/linux/debian/gpg
+    state: present
+- name: add docker apt repository
+  apt_repository:
+    repo: deb https://download.docker.com/linux/debian stretch stable
+    update_cache: yes
+- name: install docker
+  apt:
+    name: "{{ item }}"
+    state: latest
+  with_items: ['docker-ce']

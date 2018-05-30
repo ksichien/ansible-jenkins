@@ -1,0 +1,25 @@
+---
+# file: roles/ci/tasks/jenkins.yml
+- name: install jenkins prerequisites
+  apt:
+    name: "{{ item }}"
+    state: latest
+  with_items: ['openjdk-8-jre']
+- name: add jenkins apt key
+  apt_key:
+    url: https://pkg.jenkins.io/debian/jenkins.io.key
+    state: present
+- name: add jenkins apt repository
+  apt_repository:
+    repo: deb http://pkg.jenkins.io/debian-stable binary/
+    update_cache: yes
+- name: install jenkins
+  apt:
+    name: "{{ item }}"
+    state: latest
+  with_items: ['jenkins']
+- name: configure jenkins
+  replace:
+    path: /etc/default/jenkins
+    regexp: 'JENKINS_ARGS="--webroot=/var/cache/$NAME/war --httpPort=$HTTP_PORT"'
+    replace: 'JENKINS_ARGS="--webroot=/var/cache/$NAME/war --httpListenAddress=127.0.0.1 --httpPort=$HTTP_PORT"'

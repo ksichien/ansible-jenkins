@@ -1,0 +1,25 @@
+---
+# file: roles/web/tasks/nodejs.yml
+- name: install nodejs prerequisites
+  apt:
+    name: "{{ item }}"
+    state: latest
+  with_items: ['apt-transport-https', 'build-essential', 'ca-certificates', 'curl']
+- name: check whether nodejs is installed
+  stat:
+    path: /usr/bin/nodejs
+  register: nodejs_installed
+- name: download the nodejs setup script from nodesource
+  get_url:
+    url: https://deb.nodesource.com/setup_8.x
+    dest: "/var/lib/jenkins/setup-nodejs"
+    mode: 0755
+  when: not nodejs_installed.stat.exists
+- name: execute the nodejs setup script
+  shell: "/var/lib/jenkins/setup-nodejs"
+  when: not nodejs_installed.stat.exists
+- name: install nodejs
+  apt:
+    name: "{{ item }}"
+    state: latest
+  with_items: ['nodejs']

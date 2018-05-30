@@ -1,0 +1,6 @@
+---
+# file: roles/web/tasks/git.yml
+- name: install git
+  apt:
+    name: git
+    state: latest

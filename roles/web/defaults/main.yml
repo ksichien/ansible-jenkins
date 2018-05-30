@@ -1,0 +1,14 @@
+---
+# file: roles/web/defaults/main.yml
+# Variables set in this folder are only available for this role.
+certificate:
+  common: authority.darkness.org
+  passphrase: self_signed_certificate_passphrase
+git:
+  repository:
+    rbenv: https://github.com/rbenv/rbenv.git
+    ruby_build: https://github.com/rbenv/ruby-build.git
+ruby:
+  version: 2.4.3
+server:
+  name: "{{ ansible_default_ipv4.address }}"

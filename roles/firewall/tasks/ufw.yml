@@ -1,0 +1,22 @@
+---
+# file: roles/firewall/tasks/ufw.yml
+- name: install ufw
+  apt:
+    name: ufw
+    state: latest
+- name: allow ssh
+  ufw:
+    rule: limit
+    name: OpenSSH
+- name: allow web
+  ufw:
+    rule: allow
+    port: 443
+- name: enable ufw
+  ufw:
+    state: enabled
+- name: make sure ufw is running and enabled on startup
+  service:
+    name: ufw
+    state: started
+    enabled: yes
